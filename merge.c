@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+// Merge sort for integers.
+
 void copyArray(int *dataFrom, int *dataTo, int size, int start);
 void merge(int *data, int low, int mid, int high);
 
@@ -11,7 +13,6 @@ void mergeSort(int *data, int low, int high) {
     if (high <= low) { 			// One element base case
 	return;
     }
-
     int mid = (high - low)/2 + low;
     mergeSort(data, low, mid);
     mergeSort(data, mid + 1, high);
@@ -27,7 +28,6 @@ void merge(int *data, int low, int mid, int high) {
     int k = 0;
 
     int size = high - low + 1;
-
     int copy[size];
 
     while ((i <= mid) && (j <= high)) {

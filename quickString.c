@@ -4,6 +4,8 @@
 
 #include "readlines.c"
 
+// Quick sort for strings.
+
 #define MAXLINES 300000 
 
 void swap(char *data[], int index1, int index2);

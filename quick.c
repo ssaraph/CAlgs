@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+// Quick sort for integers.
+
 void swap(int *data, int index1, int index2);
 
 // Provide array of integers, and the indices, inclusive, between which to sort.

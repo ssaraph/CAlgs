@@ -6,6 +6,8 @@
 
 #define MAXLINES 300000
 
+// Merge sort for strings.
+
 void copyArray(char *dataFrom[], char *dataTo[], int size, int start);
 void merge(char *data[], int low, int mid, int high);
 
@@ -33,7 +35,6 @@ void merge(char *data[], int low, int mid, int high) {
     int k = 0;
 
     int size = high - low + 1;
-
     char *copy[size];
 
     while ((i <= mid) && (j <= high)) {
@@ -48,7 +49,6 @@ void merge(char *data[], int low, int mid, int high) {
     }
 
     copyArray(copy, data, size, low);
-
 }
 
 // Copy arrays
