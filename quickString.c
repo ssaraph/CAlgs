@@ -2,7 +2,7 @@
 #include <string.h> // For strcmp
 #include <stdlib.h> // For exit
 
-#include "readlines.c"
+#include "readinput.c"
 
 // Quick sort for strings.
 

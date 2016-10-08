@@ -1,4 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h> // For exit
+
+#include "readinput.c"
+
+#define MAXINTS 300000
 
 // Merge sort for integers.
 
@@ -77,16 +82,20 @@ int main(int argc, char *argv[]) {
     }
     else if (argc == 2) {
         FILE *fin;
-        int intBuf[100000];
-        if((fin = fopen(argv[1], "r")) != NULL) {
-            i = 0;
-            while(fscanf(fin, "%d", intBuf+i) > 0) {
-                i = i + 1;
-            }
-            mergeSort(intBuf, 0, i-1);
-            for(j = 0; j < i; j++) {
-                printf("%d ", intBuf[j]);
-            }
+        int intBuf[MAXINTS];
+	int nints;
+
+	fin = fopen(argv[1], "r");
+	if (fin == NULL) {
+	    fprintf(stderr, "Error: couldn't open file.\n");
+	    exit(1);
+	}
+
+	nints = readints(fin, intBuf, MAXINTS);
+        mergeSort(intBuf, 0, nints-1);
+
+        for(i = 0; i < nints; i++) {
+            printf("%d ", intBuf[i]);
         }
     }
     else {

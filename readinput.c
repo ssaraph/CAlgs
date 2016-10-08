@@ -19,3 +19,18 @@ int readlines(FILE *fin, char *lines[], int maxlines) {
     }
     return nlines;
 }
+
+// Read from fin up to max number of ints into data[].
+int readints(FILE *fin, int data[], int max) {
+
+    int nints = 0;
+    
+    while((nints < max) && (fscanf(fin, "%d", data+nints) > 0)){
+	nints += 1;
+    }
+
+    if (nints == max) {
+	fprintf(stderr, "Warning: max number of input integers reached. Ignoring further input.\n");
+    }
+    return nints;
+}
