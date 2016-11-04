@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "queueGeneric.h" 	// For binaryTreePrint function.
+#include <math.h>		// For binaryTreePrint function.
+
 /*
 Example of an implementation of a binary search tree. In this example, the key is an integer.
 Supports dynamic set operations:
@@ -248,6 +251,129 @@ void inOrderPrint(struct tnode *tp) {
     return;
 }
 
+
+/****** Functions for printing the binary tree. ******/
+struct printNode {
+    struct tnode *tp;
+    int depth;
+};
+
+// Return maximum width of a key in the tree (in number of characters when printed).
+int maxKeyWidth(struct tnode *tp) {
+    if (tp == NULL) {
+	return 0;
+    }
+    int width = 1;
+    if (tp->key != 0) {
+    	width = log10(tp->key) + 1;
+    }
+    int lval = maxKeyWidth(tp->left);
+    int rval = maxKeyWidth(tp->right);
+    rval = (lval > rval) ? lval : rval;
+    return (width > rval) ? width : rval;
+}
+
+// If tree is empty, returns -1. If tree has one node, returns 0.
+int treeHeight(struct tnode *tp) {
+    if (tp == NULL) {
+	return -1;
+    }
+    else {
+        int lval = treeHeight(tp->left);
+	int rval = treeHeight(tp->right);
+	return (lval > rval) ? (lval + 1) : (rval + 1);
+    }
+}
+
+struct printNode * printNodeAlloc(struct tnode *tp, int depth) {
+    struct printNode *p = (struct printNode *) malloc(sizeof(*p));
+    if (p == NULL) {
+	fprintf(stderr, "Error: couldn't allocate space for new printNode.\n");
+	exit(1);
+    }
+    p->tp = tp;
+    p->depth = depth;
+    return p;
+}
+
+void printSpaces(int n, int c) {
+    int i;
+    for(i = 0; i < n; i++) {
+        fputc(c, stdout);
+    }
+}
+
+void binaryTreePrint(struct tnode *tp) {
+    if (tp == NULL) {
+	printf("Empty tree.\n");
+	return;
+    }
+    int currentDepth = 0;
+    int height = treeHeight(tp);
+    int keyWidth = maxKeyWidth(tp);
+    // Two digits should be sufficient for keyWidth, i.e. "%##d".
+    char formatString[5];
+    if (keyWidth > 99) {
+	sprintf(formatString, "%%99d");
+    }
+    else {
+	sprintf(formatString, "%%%dd", keyWidth);
+    }
+
+
+    struct queue *nodeQueue = queueAlloc(); 
+    enqueue(nodeQueue, printNodeAlloc(tp, 0));
+
+    struct printNode *currentNode;
+    int i;
+    // Loop condition (currentDepth <= height) allows us to add NULL nodes (i.e. currentNode->tp == NULL) 
+    // to the queue in order to keep alignment for non-complete trees correct. Ordinarily, I would use 
+    // condition !queueIsEmpty(nodeQueue) instead, but this won't work because I am adding NULL nodes to 
+    // the queue so the queue will never be empty.
+
+    printf("Tree Height: %d\n", height);
+    while (currentDepth <= height) {
+        currentNode = (struct printNode *) dequeue(nodeQueue);
+	if (currentNode->depth != currentDepth) {
+	    currentDepth += 1;
+	    printf("\n");
+	}
+	/*
+	Want:
+	(Width of all keys on level) + (Width of additional space) = (2^height)*keyWidth
+	Solve for Width of additional space from there.
+	*/
+	// General spaces for each level
+	printSpaces(pow(2, height-currentDepth), ' ');
+	// Additional spaces for missing keys
+	printSpaces(((pow(2, height) - pow(2, currentDepth))*keyWidth)/(pow(2, currentDepth+1)), ' ');
+	if (currentNode->tp != NULL) {
+	    printf(formatString, currentNode->tp->key);
+	}
+	else {
+	    printSpaces(keyWidth, ' ');
+	}
+	// Additional spaces for missing keys
+	printSpaces(((pow(2, height) - pow(2, currentDepth))*keyWidth)/(pow(2, currentDepth+1)), ' ');
+	// General spaces for each level
+	printSpaces(pow(2, height-currentDepth), ' ');
+	if (currentNode->tp != NULL) {
+	    enqueue(nodeQueue, printNodeAlloc(currentNode->tp->left, currentDepth+1));
+	    enqueue(nodeQueue, printNodeAlloc(currentNode->tp->right, currentDepth+1));
+	}
+	// Adding NULL nodes to queue for alignment purposes.
+	else {
+	    enqueue(nodeQueue, printNodeAlloc(NULL, currentDepth+1));
+	    enqueue(nodeQueue, printNodeAlloc(NULL, currentDepth+1));
+	}
+    }
+    while (!queueIsEmpty(nodeQueue)) {
+	free(dequeue(nodeQueue));
+    }
+    free(nodeQueue);
+    printf("\n");
+}
+
 int main() {
 
     /*
@@ -257,49 +383,58 @@ int main() {
     */
 
     struct tnode *root = NULL;
-    root = treeInsertKey(root, 50);
-    root = treeInsertKey(root, 30);
-    root = treeInsertKey(root, 80);
-    root = treeInsertKey(root, 10);
-    root = treeInsertKey(root, 40);
-    root = treeInsertKey(root, 60);
-    root = treeInsertKey(root, 90);
-    root = treeInsertKey(root, 70);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 50);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 30);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 80);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 10);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 40);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 60);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 90);
+    binaryTreePrint(root);
+    root = treeInsertKey(root, 70);
+    binaryTreePrint(root);
+
     printf("\n");
 
     // Test deletion of leaf
     struct tnode *tmp = treeSearch(root, 70);
     root = treeDelete(root, tmp);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
 
     root = treeInsertKey(root, 70);
     root = treeInsertKey(root, 75);
     root = treeInsertKey(root, 72);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
 
     // Test deletion of node with one child
     tmp = treeSearch(root, 70);
     root = treeDelete(root, tmp);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
 
     root = treeInsertKey(root, 45);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
 
     // Test deletion of node with two children, right child is successor.
     tmp = treeSearch(root, 30);
     root = treeDelete(root, tmp);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
 
     printf("root key %d\n", root->key);
@@ -308,8 +443,7 @@ int main() {
     // (Also test deletion of the root of the tree).
     root = treeDelete(root, root);
 
-    inOrderPrint(root);
+    binaryTreePrint(root);
     printf("\n");
-
     return 0;
 }
